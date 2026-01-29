@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secret Santa – 3D Filament Puzzle</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: radial-gradient(circle at top, #1e1e2f, #0b0b12);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+  }
+
+  .game {
+    width: 100%;
+    max-width: 900px;
+    background: #141421;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+
+  h1 {
+    text-align: center;
+    margin: 0 0 6px 0;
+    font-size: clamp(20px, 5vw, 32px);
+  }
+
+  .subtitle {
+    text-align: center;
+    opacity: 0.8;
+    margin-bottom: 16px;
+    font-size: clamp(14px, 3.5vw, 16px);
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .column h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+
+  .item {
+    background: linear-gradient(145deg, #2a2a40, #1b1b2d);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    font-size: 16px;
+    text-align: center;
+    user-select: none;
+  }
+
+  .item:active {
+    transform: scale(0.97);
+  }
+
+  .item.selected {
+    outline: 3px solid #3fd1ff;
+  }
+
+  .item.correct {
+    background: linear-gradient(145deg, #1f5f3a, #163f28);
+    cursor: default;
+    box-shadow: 0 0 0 2px rgba(63,209,255,0.3) inset;
+  }
+
+  .voucher {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    text-align: center;
+    background: linear-gradient(145deg, #c62828, #8e0000);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  }
+
+  .voucher h2 {
+    margin: 0 0 10px 0;
+    font-size: 22px;
+  }
+
+  .code {
+    font-size: clamp(18px, 6vw, 28px);
+    letter-spacing: 2px;
+    font-weight: bold;
+    background: #fff;
+    color: #000;
+    padding: 12px 16px;
+    border-radius: 10px;
+    display: inline-block;
+    word-break: break-all;
+  }
+
+  /* Tablet and up */
+  @media (min-width: 700px) {
+    .board {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+  <h1>🎄 Secret Santa – 3D Filament Puzzle</h1>
+  <div class="subtitle">
+    Tap a filament, then tap the correct printed gift
+  </div>
+
+  <div class="board">
+    <div class="column" id="filaments">
+      <h2>Filaments</h2>
+      <div class="item" data-id="pla">PLA – Red</div>
+      <div class="item" data-id="petg">PETG – Transparent</div>
+      <div class="item" data-id="abs">ABS – Black</div>
+    </div>
+
+    <div class="column" id="gifts">
+      <h2>Printed Gifts</h2>
+      <div class="item" data-id="pla">🎁 Christmas Ornament</div>
+      <div class="item" data-id="abs">🛠️ Tool Holder</div>
+      <div class="item" data-id="petg">💧 Waterproof Phone Stand</div>
+    </div>
+  </div>
+
+  <div class="voucher" id="voucher">
+    <h2>🎅 Secret Santa Reward</h2>
+    <p>Your eMAG voucher code:</p>
+    <div class="code">EMAG-XXXX-XXXX-XXXX</div>
+  </div>
+</div>
+
+<script>
+  let selectedFilament = null;
+  let matches = 0;
+
+  const filaments = document.querySelectorAll('#filaments .item');
+  const gifts = document.querySelectorAll('#gifts .item');
+  const voucher = document.getElementById('voucher');
+
+  filaments.forEach(f => {
+    f.addEventListener('click', () => {
+      if (f.classList.contains('correct')) return;
+      filaments.forEach(x => x.classList.remove('selected'));
+      selectedFilament = f;
+      f.classList.add('selected');
+    });
+  });
+
+  gifts.forEach(g => {
+    g.addEventListener('click', () => {
+      if (!selectedFilament) return;
+      if (g.classList.contains('correct')) return;
+
+      if (g.dataset.id === selectedFilament.dataset.id) {
+        g.classList.add('correct');
+        selectedFilament.classList.add('correct');
+        selectedFilament.classList.remove('selected');
+        selectedFilament = null;
+        matches++;
+
+        if (matches === 3) {
+          voucher.style.display = 'block';
+        }
+      } else {
+        g.style.transform = 'translateX(8px)';
+        setTimeout(() => g.style.transform = '', 120);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
