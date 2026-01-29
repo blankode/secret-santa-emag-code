@@ -3,191 +3,359 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hello Denis, match the corresponding filaments and you will have a surprise!</title>
+<title>Hello Denis! Solve the Secret Santa puzzle!</title>
 
 <style>
-  * {
-    box-sizing: border-box;
-  }
+:root {
+  --red:#8b1d1d;
+  --green:#1f5f3a;
+  --gold:#f4d27a;
+}
 
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: radial-gradient(circle at top, #1e1e2f, #0b0b12);
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 12px;
-  }
+body {
+  margin:0;
+  font-family:system-ui,sans-serif;
+  background:
+    radial-gradient(circle at top, #3a0f0f, #0b0202),
+    linear-gradient(135deg, var(--red), var(--green));
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
 
-  .game {
-    width: 100%;
-    max-width: 900px;
-    background: #141421;
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-  }
+.game {
+  width:100%;
+  max-width:520px;
+  background:rgba(20,10,10,.95);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:0 30px 80px rgba(0,0,0,.8);
+  border:1px solid rgba(244,210,122,.25);
+}
 
-  h1 {
-    text-align: center;
-    margin: 0 0 6px 0;
-    font-size: clamp(20px, 5vw, 32px);
-  }
+h1 {
+  text-align:center;
+  margin:0 0 6px;
+  font-size:22px;
+  color:var(--gold);
+}
 
-  .subtitle {
-    text-align: center;
-    opacity: 0.8;
-    margin-bottom: 16px;
-    font-size: clamp(14px, 3.5vw, 16px);
-  }
+.task-title {
+  text-align:center;
+  opacity:.85;
+  margin-bottom:10px;
+}
 
-  .board {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
+.task { display:none; }
+.task.active { display:block; }
 
-  .column h2 {
-    text-align: center;
-    margin-bottom: 10px;
-    font-size: 18px;
-  }
+.card {
+  background:linear-gradient(145deg,#3a1a1a,#1b0d0d);
+  padding:14px;
+  border-radius:14px;
+  margin:8px 0;
+  text-align:center;
+  cursor:grab;
+  user-select:none;
+  border:1px solid rgba(255,255,255,.1);
+}
 
-  .item {
-    background: linear-gradient(145deg, #2a2a40, #1b1b2d);
-    border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    font-size: 16px;
-    text-align: center;
-    user-select: none;
-  }
+.card.correct {
+  background:linear-gradient(145deg,var(--green),#163f28);
+}
 
-  .item:active {
-    transform: scale(0.97);
-  }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
 
-  .item.selected {
-    outline: 3px solid #3fd1ff;
-  }
+.dropzone {
+  border:2px dashed rgba(244,210,122,.5);
+  border-radius:12px;
+  padding:14px;
+  min-height:60px;
+  text-align:center;
+  margin-top:10px;
+}
 
-  .item.correct {
-    background: linear-gradient(145deg, #1f5f3a, #163f28);
-    cursor: default;
-    box-shadow: 0 0 0 2px rgba(63,209,255,0.3) inset;
-  }
+.bar {
+  height:20px;
+  background:#3a1a1a;
+  border-radius:10px;
+  overflow:hidden;
+  margin:12px 0;
+}
 
-  .voucher {
-    display: none;
-    margin-top: 20px;
-    padding: 20px;
-    text-align: center;
-    background: linear-gradient(145deg, #c62828, #8e0000);
-    border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-  }
+.fill {
+  height:100%;
+  width:40%;
+  background:var(--gold);
+}
 
-  .voucher h2 {
-    margin: 0 0 10px 0;
-    font-size: 22px;
-  }
+.btn {
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  font-weight:bold;
+  background:var(--gold);
+  color:#000;
+}
 
-  .code {
-    font-size: clamp(18px, 6vw, 28px);
-    letter-spacing: 2px;
-    font-weight: bold;
-    background: #fff;
-    color: #000;
-    padding: 12px 16px;
-    border-radius: 10px;
-    display: inline-block;
-    word-break: break-all;
-  }
+.modal {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
 
-  /* Tablet and up */
-  @media (min-width: 700px) {
-    .board {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
+.modal-content {
+  background:linear-gradient(145deg,#8b1d1d,#5a0f0f);
+  padding:24px;
+  border-radius:18px;
+  text-align:center;
+  width:90%;
+  max-width:400px;
+  border:2px solid var(--gold);
+}
+
+.code {
+  background:#fff;
+  color:#000;
+  padding:12px;
+  border-radius:8px;
+  font-weight:bold;
+  letter-spacing:2px;
+  margin-top:12px;
+  display:inline-block;
+}
 </style>
 </head>
 
 <body>
 
 <div class="game">
-  <h1>🎄 Secret Santa – 3D Filament Puzzle</h1>
-  <div class="subtitle">
-    Tap a filament, then tap the correct printed gift
+  <h1>🎄 Secret Santa – Crew Tasks</h1>
+  <div class="task-title" id="title"></div>
+
+  <!-- TASK 1 -->
+  <div class="task active">
+    <p>Select filaments resistant to heat AND moisture</p>
+    <div class="grid" id="filaments">
+      <div class="card" draggable="true" data-id="pla">PLA</div>
+      <div class="card" draggable="true" data-id="abs">ABS</div>
+      <div class="card" draggable="true" data-id="petg">PETG</div>
+    </div>
+    <div class="dropzone" id="filamentDrop">Drop correct filaments here</div>
   </div>
 
-  <div class="board">
-    <div class="column" id="filaments">
-      <h2>Filaments</h2>
-      <div class="item" data-id="pla">PLA – Red</div>
-      <div class="item" data-id="petg">PETG – Transparent</div>
-      <div class="item" data-id="abs">ABS – Black</div>
-    </div>
-
-    <div class="column" id="gifts">
-      <h2>Printed Gifts</h2>
-      <div class="item" data-id="pla">🎁 Christmas Ornament</div>
-      <div class="item" data-id="abs">🛠️ Tool Holder</div>
-      <div class="item" data-id="petg">💧 Waterproof Phone Stand</div>
+  <!-- TASK 2 -->
+  <div class="task">
+    <p id="wireHint">Memorize the wire order</p>
+    <div class="grid" id="wirePreview"></div>
+    <div class="grid" id="wirePool" style="display:none"></div>
+    <div class="dropzone" id="wireDrop" style="display:none">
+      Drop wires here (left → right)
     </div>
   </div>
 
-  <div class="voucher" id="voucher">
-    <h2>🎅 Secret Santa Reward</h2>
+  <!-- TASK 3 -->
+  <div class="task">
+    <p>Stabilize temperature (keep between 60–70%)</p>
+    <div class="bar"><div class="fill" id="tempFill"></div></div>
+    <button class="btn" id="holdBtn">Hold</button>
+  </div>
+
+  <!-- TASK 4 -->
+  <div class="task">
+    <p>Arrange print queue correctly</p>
+    <div id="queuePool"></div>
+    <div class="dropzone" id="queueDrop">Drop steps here in order</div>
+  </div>
+
+  <!-- TASK 5 -->
+  <div class="task">
+    <p>Final assembly checklist</p>
+    <div class="card" onclick="check(this)">Frame assembled</div>
+    <div class="card" onclick="check(this)">Supports removed</div>
+    <div class="card" onclick="check(this)">Surface cleaned</div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2>🎁 Secret Santa Complete</h2>
     <p>Your eMAG voucher code:</p>
-    <div class="code">EMAG-XXXX-XXXX-XXXX</div>
+    <div class="code">EMAG-XXXX-XXXX</div>
   </div>
 </div>
 
 <script>
-  let selectedFilament = null;
-  let matches = 0;
+let task=0;
+const tasks=document.querySelectorAll('.task');
+const titles=[
+  "Filament calibration",
+  "Wiring memory",
+  "Temperature control",
+  "Print queue validation",
+  "Final assembly"
+];
+const titleEl=document.getElementById('title');
+titleEl.innerText=titles[0];
 
-  const filaments = document.querySelectorAll('#filaments .item');
-  const gifts = document.querySelectorAll('#gifts .item');
-  const voucher = document.getElementById('voucher');
+function next(){
+  tasks[task].classList.remove('active');
+  task++;
+  tasks[task].classList.add('active');
+  titleEl.innerText=titles[task];
+  if(task===1) initWires();
+}
 
-  filaments.forEach(f => {
-    f.addEventListener('click', () => {
-      if (f.classList.contains('correct')) return;
-      filaments.forEach(x => x.classList.remove('selected'));
-      selectedFilament = f;
-      f.classList.add('selected');
-    });
+/* DRAG SUPPORT */
+let dragged=null;
+document.addEventListener('dragstart',e=>{
+  if(e.target.classList.contains('card')) dragged=e.target;
+});
+document.querySelectorAll('.dropzone').forEach(z=>{
+  z.addEventListener('dragover',e=>e.preventDefault());
+});
+
+/* TASK 1 */
+const filamentDrop=document.getElementById('filamentDrop');
+let fChosen=[];
+filamentDrop.addEventListener('drop',()=>{
+  filamentDrop.appendChild(dragged);
+  fChosen.push(dragged.dataset.id);
+  dragged=null;
+  if(fChosen.length===2){
+    if(fChosen.includes('abs') && fChosen.includes('petg')) setTimeout(next,600);
+    else resetFilaments();
+  }
+});
+function resetFilaments(){
+  fChosen=[];
+  document.getElementById('filaments').querySelectorAll('.card')
+    .forEach(c=>document.getElementById('filaments').appendChild(c));
+}
+
+/* TASK 2 */
+const correctWires=['red','blue','yellow'];
+const wirePreview=document.getElementById('wirePreview');
+const wirePool=document.getElementById('wirePool');
+const wireDrop=document.getElementById('wireDrop');
+const wireHint=document.getElementById('wireHint');
+
+function initWires(){
+  wirePreview.innerHTML='';
+  wirePool.innerHTML='';
+  wireDrop.innerHTML='';
+  wirePreview.style.display='grid';
+  wirePool.style.display='none';
+  wireDrop.style.display='none';
+  wireHint.innerText='Memorize the wire order';
+
+  correctWires.forEach(w=>{
+    const d=document.createElement('div');
+    d.className='card correct';
+    d.innerText=w;
+    wirePreview.appendChild(d);
   });
 
-  gifts.forEach(g => {
-    g.addEventListener('click', () => {
-      if (!selectedFilament) return;
-      if (g.classList.contains('correct')) return;
+  setTimeout(()=>{
+    wirePreview.style.display='none';
+    wireHint.innerText='Reconnect wires in the same order';
 
-      if (g.dataset.id === selectedFilament.dataset.id) {
-        g.classList.add('correct');
-        selectedFilament.classList.add('correct');
-        selectedFilament.classList.remove('selected');
-        selectedFilament = null;
-        matches++;
-
-        if (matches === 3) {
-          voucher.style.display = 'block';
-        }
-      } else {
-        g.style.transform = 'translateX(8px)';
-        setTimeout(() => g.style.transform = '', 120);
-      }
+    [...correctWires].sort(()=>Math.random()-.5).forEach(w=>{
+      const d=document.createElement('div');
+      d.className='card';
+      d.innerText=w;
+      d.draggable=true;
+      d.dataset.id=w;
+      wirePool.appendChild(d);
     });
-  });
+
+    wirePool.style.display='grid';
+    wireDrop.style.display='block';
+  },2500);
+}
+
+wireDrop.addEventListener('drop',()=>{
+  wireDrop.appendChild(dragged);
+  dragged=null;
+  if(wireDrop.children.length===3){
+    const order=[...wireDrop.children].map(c=>c.dataset.id);
+    if(JSON.stringify(order)===JSON.stringify(correctWires)) next();
+    else initWires();
+  }
+});
+
+/* TASK 3 */
+let temp=40;
+const fill=document.getElementById('tempFill');
+const btn=document.getElementById('holdBtn');
+let intv;
+btn.addEventListener('mousedown',startTemp);
+btn.addEventListener('touchstart',startTemp);
+btn.addEventListener('mouseup',stopTemp);
+btn.addEventListener('touchend',stopTemp);
+
+function startTemp(){
+  intv=setInterval(()=>{
+    temp+=1.5;
+    fill.style.width=temp+'%';
+    if(temp>70){ temp=40; fill.style.width='40%'; }
+    if(temp>=60 && temp<=70){ clearInterval(intv); next(); }
+  },50);
+}
+function stopTemp(){ clearInterval(intv); }
+
+/* TASK 4 */
+const correctQueue=['Slice','Calibrate','Print'];
+const queuePool=document.getElementById('queuePool');
+const queueDrop=document.getElementById('queueDrop');
+
+[...correctQueue].sort(()=>Math.random()-.5).forEach(q=>{
+  const d=document.createElement('div');
+  d.className='card';
+  d.innerText=q;
+  d.draggable=true;
+  d.dataset.id=q;
+  queuePool.appendChild(d);
+});
+
+queueDrop.addEventListener('drop',()=>{
+  queueDrop.appendChild(dragged);
+  dragged=null;
+  if(queueDrop.children.length===3){
+    const order=[...queueDrop.children].map(c=>c.dataset.id);
+    if(JSON.stringify(order)===JSON.stringify(correctQueue)) next();
+    else {
+      queueDrop.innerHTML='';
+      [...correctQueue].sort(()=>Math.random()-.5).forEach(q=>{
+        const d=document.createElement('div');
+        d.className='card';
+        d.innerText=q;
+        d.draggable=true;
+        d.dataset.id=q;
+        queuePool.appendChild(d);
+      });
+    }
+  }
+});
+
+/* TASK 5 */
+let done=0;
+function check(el){
+  if(el.classList.contains('correct')) return;
+  el.classList.add('correct');
+  done++;
+  if(done===3) document.getElementById('modal').style.display='flex';
+}
 </script>
 
 </body>
