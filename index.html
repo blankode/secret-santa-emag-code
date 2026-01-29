@@ -191,7 +191,9 @@ h1 {
   <div class="modal-content">
     <h2>🎁 Secret Santa Complete</h2>
     <p>Your eMAG voucher code:</p>
-    <div class="code">EMAG-XXXX-XXXX</div>
+    <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px;">
+      <div class="code" id="voucherCode" style="cursor:pointer;" title="Click to copy">EMAG-XXXX-XXXX</div>
+    </div>
   </div>
 </div>
 
@@ -356,6 +358,16 @@ function check(el){
   done++;
   if(done===3) document.getElementById('modal').style.display='flex';
 }
+
+/* COPY VOUCHER CODE */
+const voucher = document.getElementById('voucherCode');
+
+voucher.addEventListener('click', () => {
+  navigator.clipboard.writeText(voucher.innerText).then(() => {
+    voucher.innerText = 'Copied! 🎁';
+    setTimeout(() => voucher.innerText = 'EMAG-XXXX-XXXX', 1500);
+  });
+});
 </script>
 
 </body>
